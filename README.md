@@ -1,8 +1,10 @@
-# Devise Security Extension
+# Devise Security
 
-[![Build Status](https://travis-ci.org/phatworx/devise_security_extension.svg?branch=master)](https://travis-ci.org/phatworx/devise_security_extension)
+[![Build Status](https://travis-ci.org/devise-security/devise-security.svg?branch=master)](https://travis-ci.org/devise-security/devise-security)
+[![Coverage Status](https://coveralls.io/repos/github/devise-security/devise-security/badge.svg?branch=master)](https://coveralls.io/github/devise-security/devise-security?branch=master)
+[![Maintainability](https://api.codeclimate.com/v1/badges/ace7cd003a0db8bffa5a/maintainability)](https://codeclimate.com/github/devise-security/devise-security/maintainability)
 
-An enterprise security extension for [Devise](https://github.com/plataformatec/devise), trying to meet industrial standard security demands for web applications.
+A [Devise](https://github.com/plataformatec/devise) extension to add additional security features required by modern web applications. Forked from [Devise Security Extension](https://github.com/phatworx/devise_security_extension)
 
 It is composed of 7 additional Devise modules:
 
@@ -22,22 +24,22 @@ Configuration and database schema for each module below.
 
 ## Getting started
 
-Devise Security Extension works with Devise on Rails 3.2 onwards. You can add it to your Gemfile after you successfully set up Devise (see [Devise documentation](https://github.com/plataformatec/devise)) with:
+Devise Security works with Devise on Rails 4.1 onwards. You can add it to your Gemfile after you successfully set up Devise (see [Devise documentation](https://github.com/plataformatec/devise)) with:
 
 ```ruby
-gem 'devise_security_extension'
+gem 'devise-security'
 ```
 
 Run the bundle command to install it.
 
-After you installed Devise Security Extension you need to run the generator:
+After you installed Devise Security you need to run the generator:
 
 ```console
-rails generate devise_security_extension:install
+rails generate devise_security:install
 ```
 
-The generator adds optional configurations to `config/initializers/devise.rb`. Enable
-the modules you wish to use in the initializer you are ready to add Devise Security Extension modules on top of Devise modules to any of your Devise models:
+The generator adds optional configurations to `config/initializers/devise-security.rb`. Enable
+the modules you wish to use in the initializer you are ready to add Devise Security modules on top of Devise modules to any of your Devise models:
 
 ```ruby
 devise :password_expirable, :secure_validatable, :password_archivable, :session_limitable, :expirable
@@ -59,8 +61,8 @@ Devise.setup do |config|
   # Should the password expire (e.g 3.months)
   # config.expire_password_after = 3.months
 
-  # Need 1 char of A-Z, a-z and 0-9
-  # config.password_regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/
+  # Need 1 char each of: A-Z, a-z, 0-9, and a punctuation mark or symbol
+  # config.password_complexity = { digit: 1, lower: 1, symbol: 1, upper: 1 }
 
   # Number of old passwords in archive
   # config.password_archiving_count = 5
@@ -99,7 +101,7 @@ end
 ```
 
 ## Captcha-Support
-The captcha support depends on [EasyCaptcha](https://github.com/phatworx/easy_captcha). See further documention there.
+The captcha support depends on [EasyCaptcha](https://github.com/phatworx/easy_captcha). See further documentation there.
 
 ### Installation
 
@@ -111,7 +113,7 @@ gem 'easy_captcha'
 ```ruby
 rails generate easy_captcha:install
 ```
-3. Enable captcha - see "Configuration" of Devise Security Extension above.
+3. Enable captcha - see "Configuration" of Devise Security above.
 4. Add the captcha in the generated devise views for each controller you have activated
 ```erb
 <p><%= captcha_tag %></p>
@@ -119,6 +121,8 @@ rails generate easy_captcha:install
 ```
 
 ## Schema
+
+Note: Unlike Devise, devise-security does not currently support mongoid.  Pull requests are welcome!
 
 ### Password expirable
 ```ruby
@@ -133,12 +137,13 @@ add_index :the_resources, :password_changed_at
 ### Password archivable
 ```ruby
 create_table :old_passwords do |t|
-  t.string :encrypted_password, :null => false
-  t.string :password_archivable_type, :null => false
-  t.integer :password_archivable_id, :null => false
+  t.string :encrypted_password, null: false
+  t.string :password_archivable_type, null: false
+  t.integer :password_archivable_id, null: false
+  t.string :password_salt # Optional. bcrypt stores the salt in the encrypted password field so this column may not be necessary.
   t.datetime :created_at
 end
-add_index :old_passwords, [:password_archivable_type, :password_archivable_id], :name => :index_password_archivable
+add_index :old_passwords, [:password_archivable_type, :password_archivable_id], name: :index_password_archivable
 ```
 
 ### Session limitable
@@ -146,7 +151,7 @@ add_index :old_passwords, [:password_archivable_type, :password_archivable_id], 
 create_table :the_resources do |t|
   # other devise fields
 
-  t.string :unique_session_id, :limit => 20
+  t.string :unique_session_id, limit: 20
 end
 ```
 
@@ -175,7 +180,7 @@ add_index :the_resources, :paranoid_verification_code
 add_index :the_resources, :paranoid_verified_at
 ```
 
-[Documentation for Paranoid Verifiable module]( https://github.com/phatworx/devise_security_extension/wiki/Paranoid-Verification)
+[Documentation for Paranoid Verifiable module]( https://github.com/devise-security/devise-security/wiki/Paranoid-Verification)
 
 ### Security questionable
 
@@ -189,8 +194,8 @@ end
 
 ```ruby
 create_table :security_questions do |t|
-  t.string :locale, :null => false
-  t.string :name, :null => false
+  t.string :locale, null: false
+  t.string :name, null: false
 end
 
 SecurityQuestion.create! locale: :de, name: 'Wie lautet der Geburstname Ihrer Mutter?'
@@ -222,7 +227,7 @@ end
 ## Requirements
 
 * Devise (https://github.com/plataformatec/devise)
-* Rails 3.2 onwards (http://github.com/rails/rails)
+* Rails 4.1 onwards (http://github.com/rails/rails)
 * recommendations:
   * `autocomplete-off` (http://github.com/phatworx/autocomplete-off)
   * `easy_captcha` (http://github.com/phatworx/easy_captcha)
@@ -242,16 +247,13 @@ end
 * 0.6 expirable module
 * 0.7 security questionable module for recover and unlock
 * 0.8 Support for Rails 4 (+ variety of patches)
+* 0.11 Support for Rails 5. Forked to allow project maintenance and features
 
 ## Maintainers
 
-* Team Phatworx (https://github.com/phatworx)
-* Alexander Dreher (https://github.com/alexdreher)
-* Christoph Chilian (https://github.com/cc-web)
-* Marco Scholl (https://github.com/traxanos)
-* Thomas Powell (https://github.com/stringsn88keys)
+* Nate Bird (https://github.com/natebird)
 
-## Contributing to devise_security_extension
+## Contributing to devise-security
 
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
@@ -263,4 +265,4 @@ end
 
 ## Copyright
 
-Copyright (c) 2011-2015 Marco Scholl. See LICENSE.txt for further details.
+Copyright (c) 2011-2017 Marco Scholl. See LICENSE.txt for further details.

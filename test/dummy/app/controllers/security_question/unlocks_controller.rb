@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class SecurityQuestion::UnlocksController < Devise::UnlocksController
-  include DeviseSecurityExtension::Patches::ControllerSecurityQuestion
+  include DeviseSecurity::Patches::ControllerSecurityQuestion
 end

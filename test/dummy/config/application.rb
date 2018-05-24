@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
-require 'devise_security_extension'
+require 'devise-security'
 
 if defined?(Bundler)
   # If you precompile assets before deploying to production, use this line
