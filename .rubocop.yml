@@ -1,15 +1,12 @@
+require:
+  - rubocop-rails
 AllCops:
-  Include:
-    - '**/Rakefile'
-    - '**/config.ru'
-    - 'lib/tasks/**/*'
+  TargetRubyVersion: 2.4
   Exclude:
     - Gemfile*
-    - 'db/**/*'
-    - 'config/**/*'
-    - 'bin/**/*'
-    - 'vendor/bundle/**/*'
-    - 'spec/support/**/*' # rspec support helpers have a strange api
+    - bin/*
+    - gemfiles/*
+    - test/**/*
 
 Rails:
   Enabled: true
@@ -19,9 +16,29 @@ Rails:
 Metrics/MethodLength:
   Enabled: false
 
+Metrics/LineLength:
+  Enabled: false
+
+Naming/FileName:
+  Exclude: ["devise-security.gemspec"]
+
+Style/ClassAndModuleChildren:
+  EnforcedStyle: compact
+  SupportedStyles:
+    - nested
+    - compact
+
+Style/HashSyntax:
+  EnforcedStyle: ruby19
+
+Style/SymbolArray:
+  EnforcedStyle: brackets
+
 # Trailing commas make for clearer diffs because the last line won't appear
 # to have been changed, as it would if it lacked a comma and had one added.
-Style/TrailingCommaInLiteral:
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma

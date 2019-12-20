@@ -48,7 +48,7 @@ module DeviseSecurity
 
           if !devise_controller? && !ignore_password_expire? && !request.format.nil? && request.format.html?
             Devise.mappings.keys.flatten.any? do |scope|
-              if signed_in?(scope)# && warden.session(scope)['password_expired']
+              if signed_in?(scope) && warden.session(scope)['password_expired']
                 # re-check to avoid infinite loop if date changed after login attempt
                 if send(:"current_#{scope}").try(:need_change_password?)
                   store_location_for(scope, request.original_fullpath) if request.get?
