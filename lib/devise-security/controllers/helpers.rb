@@ -79,7 +79,7 @@ module DeviseSecurity
 
         # redirect for password update with alert message
         def redirect_for_password_change(scope)
-          url = "#{ENV['MAIN_APP_URL'].gsub('<replace>', request.subdomain.gsub(/-lrn/, ''))}/#{scope}/password_expired"
+          url = "#{ENV['MAIN_APP_URL'].gsub('<replace>', request.subdomain.gsub(/-lrn/, ''))}/#{scope}s/password_expired"
           redirect_to url, alert: I18n.t('change_required', {scope: 'devise.password_expired'})
         end
 
