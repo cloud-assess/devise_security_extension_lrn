@@ -1,7 +1,8 @@
 source "https://rubygems.org"
 gemspec
 
-gem 'rails', '~> 5.0.0'
+gem 'rails', '~> 5.2.4.5'
+gem 'nokogiri', '~> 1.10.8'
 
 group :active_record do
   gem 'sqlite3'
