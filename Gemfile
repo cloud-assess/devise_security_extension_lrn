@@ -2,7 +2,9 @@ source "https://rubygems.org"
 gemspec
 
 gem 'rails', '~> 5.2.4.5'
-gem 'nokogiri', '~> 1.10.8'
+gem 'nokogiri', '>= 1.11.0.rc4'
+gem 'bundle-audit'
+gem 'kramdown', '>= 2.3.0'
 
 group :active_record do
   gem 'sqlite3'
