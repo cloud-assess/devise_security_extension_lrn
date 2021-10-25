@@ -125,7 +125,7 @@ GEM
       nokogiri (~> 1)
       rake
     mini_mime (1.1.0)
-    mini_portile2 (2.5.1)
+    mini_portile2 (2.6.1)
     minitest (5.14.4)
     mongo (2.14.0)
       bson (>= 4.8.2, < 5.0.0)
@@ -133,8 +133,8 @@ GEM
       activemodel (>= 5.1, < 6.2)
       mongo (>= 2.10.5, < 3.0.0)
     nio4r (2.5.7)
-    nokogiri (1.11.5)
-      mini_portile2 (~> 2.5.0)
+    nokogiri (1.12.5)
+      mini_portile2 (~> 2.6.1)
       racc (~> 1.4)
     omniauth (2.0.4)
       hashie (>= 3.4.6)
@@ -153,7 +153,7 @@ GEM
     pry-rescue (1.5.2)
       interception (>= 0.5)
       pry (>= 0.12.0)
-    racc (1.5.2)
+    racc (1.6.0)
     rack (2.2.3)
     rack-protection (2.1.0)
       rack
@@ -297,4 +297,4 @@ DEPENDENCIES
   wwtd
 
 BUNDLED WITH
-   1.17.3
+   2.2.27
