@@ -26,8 +26,8 @@ module Devise
           already_validated_email = false
 
           # validate login in a strict way if not yet validated
-          unless has_uniqueness_validation_of_login?
-            validation_condition = "saved_change_to_#{login_attribute}?".to_sym
+          unless uniqueness_validation_of_login?
+            validation_condition = "#{login_attribute}_changed?".to_sym
 
             validates login_attribute, uniqueness: {
                                           scope:          authentication_keys[1..-1],
@@ -44,17 +44,39 @@ module Devise
               validates :email, uniqueness: true, allow_blank: true, if: :email_changed? # check uniq for email ever
             end
 
-            validates :password, presence: true, length: password_length, confirmation: true, if: :password_required?
+            validates_presence_of :password, if: :password_required?
+            validates_confirmation_of :password, if: :password_required?
+
+            validate if: :password_required? do |record|
+              validates_with ActiveModel::Validations::LengthValidator,
+                             attributes: :password,
+                             allow_blank: true,
+                             in: record.password_length
+            end
           end
 
           # extra validations
-          validates :email, email: email_validation if email_validation # see https://github.com/devise-security/devise-security/blob/master/README.md#e-mail-validation
-          validates :password,
-                    'devise_security/password_complexity': password_complexity,
-                    if: :password_required?
+          # see https://github.com/devise-security/devise-security/blob/master/README.md#e-mail-validation
+          validate do |record|
+            if email_validation
+              validates_with(
+                EmailValidator, { attributes: :email }
+              )
+            end
+          end
+
+          validate if: :password_required? do |record|
+            validates_with(
+              record.password_complexity_validator.is_a?(Class) ? record.password_complexity_validator : record.password_complexity_validator.classify.constantize,
+              { attributes: :password }.merge(record.password_complexity)
+            )
+          end
 
           # don't allow use same password
           validate :current_equal_password_validation
+
+          # don't allow email to equal password
+          validate :email_not_equal_password_validation
         end
       end
 
@@ -64,10 +86,21 @@ module Devise
 
       def current_equal_password_validation
         return if new_record? || !will_save_change_to_encrypted_password? || password.blank?
+
         dummy = self.class.new(encrypted_password: encrypted_password_was).tap do |user|
           user.password_salt = password_salt_was if respond_to?(:password_salt)
         end
-        self.errors.add(:password, :equal_to_current_password) if dummy.valid_password?(password)
+        errors.add(:password, :equal_to_current_password) if dummy.valid_password?(password)
+      end
+
+      def email_not_equal_password_validation
+        return if allow_passwords_equal_to_email
+
+        return if password.blank? || email.blank? || (!new_record? && !will_save_change_to_encrypted_password?)
+
+        return unless Devise.secure_compare(password.downcase.strip, email.downcase.strip)
+
+        errors.add(:password, :equal_to_email)
       end
 
       protected
@@ -75,6 +108,8 @@ module Devise
       # Checks whether a password is needed or not. For validations only.
       # Passwords are always required if it's a new record, or if the password
       # or confirmation are being set somewhere.
+      #
+      # @return [Boolean]
       def password_required?
         !persisted? || !password.nil? || !password_confirmation.nil?
       end
@@ -83,15 +118,31 @@ module Devise
         true
       end
 
+      delegate(
+        :allow_passwords_equal_to_email,
+        :email_validation,
+        :password_complexity,
+        :password_complexity_validator,
+        :password_length,
+        to: :class
+      )
+
       module ClassMethods
-        Devise::Models.config(self, :password_complexity, :password_length, :email_validation)
+        Devise::Models.config(
+          self,
+          :allow_passwords_equal_to_email,
+          :email_validation,
+          :password_complexity,
+          :password_complexity_validator,
+          :password_length
+        )
 
         private
 
-        def has_uniqueness_validation_of_login?
+        def uniqueness_validation_of_login?
           validators.any? do |validator|
             validator_orm_klass = DEVISE_ORM == :active_record ? ActiveRecord::Validations::UniquenessValidator : ::Mongoid::Validatable::UniquenessValidator
-            validator.kind_of?(validator_orm_klass) && validator.attributes.include?(login_attribute)
+            validator.is_a?(validator_orm_klass) && validator.attributes.include?(login_attribute)
           end
         end
 
@@ -100,7 +151,7 @@ module Devise
         end
 
         def devise_validation_enabled?
-          self.ancestors.map(&:to_s).include? 'Devise::Models::Validatable'
+          ancestors.map(&:to_s).include? 'Devise::Models::Validatable'
         end
       end
     end

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
+
 DEVISE_ORM = ENV.fetch('DEVISE_ORM', 'active_record').to_sym unless defined?(DEVISE_ORM)
 
-require DEVISE_ORM.to_s if DEVISE_ORM.in? [:active_record, :mongoid]
+require DEVISE_ORM.to_s if DEVISE_ORM.in? %i[active_record mongoid]
 require 'active_support/core_ext/integer'
 require 'active_support/ordered_hash'
 require 'active_support/concern'
@@ -9,14 +10,19 @@ require 'devise'
 
 module Devise
   # Number of seconds that passwords are valid (e.g 3.months)
-  # Disable pasword expiration with +false+
+  # Disable password expiration with +false+
   # Expire only on demand with +true+
   mattr_accessor :expire_password_after
   @@expire_password_after = 3.months
 
-  # Validate password for strongness
+  # Validate password complexity
   mattr_accessor :password_complexity
   @@password_complexity = { digit: 1, lower: 1, symbol: 1, upper: 1 }
+
+  # Define the class used to validate password complexity. Set to a Class or a
+  # string which will be used to determine which class to use.
+  mattr_accessor :password_complexity_validator
+  @@password_complexity_validator = 'devise_security/password_complexity_validator'
 
   # Number of old passwords in archive
   mattr_accessor :password_archiving_count
@@ -79,11 +85,14 @@ module Devise
   # paranoid_verification will regenerate verifacation code after faild attempt
   mattr_accessor :paranoid_code_regenerate_after_attempt
   @@paranoid_code_regenerate_after_attempt = 10
+
+  # Whether to allow passwords that are equal (case insensitive) to the email
+  mattr_accessor :allow_passwords_equal_to_email
+  @@allow_passwords_equal_to_email = false
 end
 
-# an security extension for devise
+# a security extension for devise
 module DeviseSecurity
-  autoload :Schema, 'devise-security/schema'
   autoload :Patches, 'devise-security/patches'
 
   module Controllers
@@ -104,6 +113,6 @@ Devise.add_module :paranoid_verification, controller: :paranoid_verification_cod
 # requires
 require 'devise-security/routes'
 require 'devise-security/rails'
-require "devise-security/orm/#{DEVISE_ORM}"
+require "devise-security/orm/#{DEVISE_ORM}" if DEVISE_ORM == :mongoid
 require 'devise-security/models/database_authenticatable_patch'
 require 'devise-security/models/paranoid_verification'
