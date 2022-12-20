@@ -11,9 +11,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        orm: [active_record, mongoid]
-        rails: ["5.2", "6.0", "6.1", "7.0"]
-        ruby: ["2.6", "2.7", "3.0", "3.1", "head"]
+        orm: [active_record]
+        rails: ["7.0"]
+        ruby: ["3.1", "head"]
         exclude:
           - rails: 5.2
             ruby: 3.0
