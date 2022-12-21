@@ -1,18 +1,21 @@
 # frozen_string_literal: true
 
-require "shared_user_without_email"
+require 'shared_user_without_email'
 
 class UserWithoutEmail
   include Mongoid::Document
   include Shim
-  include SharedUserWithoutEmail
+
+  devise :database_authenticatable, :lockable, :recoverable,
+         :registerable, :rememberable, :timeoutable,
+         :trackable
 
   field :username, type: String
   field :facebook_token, type: String
 
   ## Database authenticatable
-  field :email, type: String, default: ""
-  field :encrypted_password, type: String, default: ""
+  field :email, type: String, default: ''
+  field :encrypted_password, type: String, default: ''
 
   ## Recoverable
   field :reset_password_token, type: String

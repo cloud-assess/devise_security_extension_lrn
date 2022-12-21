@@ -3,6 +3,13 @@
 ENV['RAILS_ENV'] ||= 'test'
 
 require 'simplecov'
+
+if ENV['CI']
+  require 'simplecov-lcov'
+  SimpleCov.formatter = SimpleCov::Formatter::LcovFormatter
+  SimpleCov::Formatter::LcovFormatter.config.report_with_single_file = true
+end
+
 SimpleCov.start do
   add_filter 'gemfiles'
   add_filter 'test/dummy/db'
@@ -18,12 +25,6 @@ SimpleCov.start do
   add_group 'Tests', 'test'
 end
 
-if ENV['CI']
-  require 'coveralls'
-  SimpleCov.formatter = Coveralls::SimpleCov::Formatter
-  Coveralls.wear!
-end
-
 require 'pry'
 require 'dummy/config/environment'
 require 'minitest/autorun'
@@ -31,6 +32,11 @@ require 'rails/test_help'
 require 'devise-security'
 require 'database_cleaner'
 require "orm/#{DEVISE_ORM}"
+
+# Controller testing is the way that Devise itself tests the functionality of
+# controller, even though it has been deprecated in favor of request tests.
+require 'rails-controller-testing'
+Rails::Controller::Testing.install
 require 'support/integration_helpers'
 
 class Minitest::Test
