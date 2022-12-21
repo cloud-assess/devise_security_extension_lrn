@@ -8,7 +8,7 @@ class CreateTables < MIGRATION_CLASS
       t.string :unique_session_id, :limit => 20
 
       # session_limitable
-      t.string :unique_session_id
+      # t.string :unique_session_id
 
       ## Database authenticatable
       t.string :email,              null: false, default: ''
