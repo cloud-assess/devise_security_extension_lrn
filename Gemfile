@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 gemspec
 
-gem 'rails', '~> 5.2.4.5'
+gem 'rails', '5.2.6.3'
 gem 'nokogiri', '>= 1.11.0.rc4'
 gem 'bundle-audit'
 gem 'kramdown', '>= 2.3.0'
